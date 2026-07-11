@@ -24,9 +24,11 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        # Production - Netlify
+        # Production - Netlify (with and without www)
         "https://app-newsbridge.netlify.app",
         "https://app-react-newsbridge.netlify.app",
+        # Allow all Netlify preview deploys
+        "https://*.netlify.app",
         # Local development
         "http://localhost:3000",
         "http://localhost:3001",
@@ -37,6 +39,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_origin_regex=r"https://.*\.netlify\.app",
 )
 
 
