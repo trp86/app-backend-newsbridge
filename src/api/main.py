@@ -24,7 +24,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        # Production
+        # Production - Netlify
+        "https://app-newsbridge.netlify.app",
         "https://app-react-newsbridge.netlify.app",
         # Local development
         "http://localhost:3000",
