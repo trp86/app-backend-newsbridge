@@ -4,7 +4,8 @@ import json
 import time
 from datetime import datetime
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -15,10 +16,9 @@ from src.editorial.prompts import get_summarization_prompt
 logger = structlog.get_logger()
 
 
-def configure_gemini() -> None:
-    """Configure Gemini API with API key."""
+def _get_gemini_client() -> genai.Client:
     settings = get_settings()
-    genai.configure(api_key=settings.gemini_api_key)
+    return genai.Client(api_key=settings.gemini_api_key)
 
 
 @retry(
@@ -42,20 +42,18 @@ def call_gemini_with_retry(model_name: str, prompt: str) -> str:
     start_time = time.time()
 
     try:
-        model = genai.GenerativeModel(model_name)
+        client = _get_gemini_client()
 
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 temperature=0.3,
-                max_output_tokens=4096,  # Increased for longer responses
+                max_output_tokens=4096,
             ),
         )
 
         latency_ms = int((time.time() - start_time) * 1000)
-
-        # Extract text from response
-        result_text = response.text
 
         logger.info(
             "gemini.success",
@@ -63,7 +61,7 @@ def call_gemini_with_retry(model_name: str, prompt: str) -> str:
             latency_ms=latency_ms,
         )
 
-        return result_text
+        return response.text
 
     except Exception as e:
         logger.error("gemini.failed", model=model_name, error=str(e))
@@ -141,7 +139,6 @@ def summarize_article(article: RawArticle) -> Brief:
         Exception: If summarization fails after retries
     """
     settings = get_settings()
-    configure_gemini()
 
     logger.info(
         "summarize.started",

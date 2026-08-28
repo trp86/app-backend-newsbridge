@@ -10,6 +10,7 @@ import pytest
 @pytest.fixture(scope="session")
 def test_env():
     """Set up test environment variables."""
+    os.environ["GEMINI_API_KEY"] = "test-gemini-key-12345"
     os.environ["OPENROUTER_API_KEY"] = "test-key-12345"
     os.environ["TELEGRAM_BOT_TOKEN"] = "test-bot-token"
     os.environ["TELEGRAM_CHANNEL_ID"] = "@test_channel"

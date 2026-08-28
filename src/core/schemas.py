@@ -19,10 +19,16 @@ class Language(str, Enum):
     ENGLISH = "en"
     ODIA = "or"
     HINDI = "hi"
+    TAMIL = "ta"
+    KANNADA = "kn"
+    SPANISH = "es"
+    CANTONESE = "yue"
+    MALAY = "ms"
+    DUTCH = "nl"
+    TURKISH = "tr"
+    ARABIC = "ar"
     BENGALI = "bn"
     TELUGU = "te"
-    KANNADA = "kn"
-    TAMIL = "ta"
 
 
 class PublishStatus(str, Enum):
