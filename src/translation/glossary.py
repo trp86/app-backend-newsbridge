@@ -73,18 +73,19 @@ GLOSSARY RULES:
    - Person names: Trump, Putin, Chrupalla, etc.
    - Acronyms: NASA, EU, NATO, GDP, CEO, etc.
 
-2. Translate these naturally:
-   - Titles: "President" → ଉପରାଷ୍ଟ୍ରପତି, "Chancellor" → କୁଳପତି
-   - Common nouns: "airline" → ବିମାନ ସେବା, "government" → ସରକାର
+2. Translate these naturally into the target language:
+   - Titles: "President", "Chancellor", "Minister"
+   - Common nouns: "airline", "government", "economy"
    - Verbs and adjectives: translate naturally
 
 3. Cultural adaptation:
-   - Don't translate word-for-word
-   - Use natural Odia phrasing
-   - Keep meaning and tone
+   - Do NOT translate word-for-word
+   - Use natural phrasing appropriate for native readers of the target language
+   - Keep the meaning and journalistic tone
+   - For right-to-left languages (Arabic): ensure correct directionality
 
 Examples:
-- "German Chancellor Olaf Scholz" → "Germany ର କୁଳପତି Olaf Scholz"
-- "NASA announced" → "NASA ଘୋଷଣା କରିଛି"
-- "the airline Condor" → "ବିମାନ ସେବା Condor"
+- "German Chancellor Olaf Scholz" → keep "Olaf Scholz" and "Germany", translate the title
+- "NASA announced" → keep "NASA", translate the verb
+- "the airline Condor" → keep "Condor", translate "airline"
 """

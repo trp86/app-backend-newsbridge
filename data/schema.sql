@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS briefs (
 CREATE TABLE IF NOT EXISTS translations (
     id TEXT PRIMARY KEY,
     brief_id TEXT NOT NULL,
-    language TEXT NOT NULL CHECK(language IN ('en', 'or', 'hi', 'bn', 'te', 'kn', 'ta')),
+    language TEXT NOT NULL CHECK(language IN ('en', 'or', 'hi', 'ta', 'kn', 'es', 'yue', 'ms', 'nl', 'tr', 'ar', 'bn', 'te')),
     title TEXT NOT NULL,
     summary_30 TEXT NOT NULL,
     summary_111 TEXT NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS translations (
 CREATE TABLE IF NOT EXISTS publications (
     id TEXT PRIMARY KEY,
     date DATE NOT NULL,
-    language TEXT NOT NULL CHECK(language IN ('en', 'or', 'hi', 'bn', 'te', 'kn', 'ta')),
+    language TEXT NOT NULL CHECK(language IN ('en', 'or', 'hi', 'ta', 'kn', 'es', 'yue', 'ms', 'nl', 'tr', 'ar', 'bn', 'te')),
     telegram_message_id TEXT,
     publish_status TEXT NOT NULL CHECK(publish_status IN ('pending', 'sent', 'failed')),
     published_at TIMESTAMP,
