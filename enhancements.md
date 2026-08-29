@@ -52,14 +52,13 @@ Previously `translate_brief()` called Gemini once per language — 11 API calls 
 ---
 
 ## 4. Database Retention — Rolling 7-Day Cleanup Job
-**Priority: Medium | Effort: Small | Status: Open**
+**Priority: Medium | Effort: Small | Status: ✅ Done**
 
-No cleanup exists today. Database will grow ~3 MB/day and hit Neon free tier limit
-(0.5 GB) in approximately 5 months.
-
-- [ ] Add daily cleanup function — delete articles older than 7 days
-- [ ] Delete in foreign key order: `translations` -> `briefs` -> `articles`
-- [ ] Wire into existing scheduler (run once daily after RSS ingestion)
+- [x] Standalone script: `scripts/retention_cleanup.py`
+- [x] Deletes in foreign-key order: `publication_stories` -> `publications` -> `translations` -> `briefs` -> `articles`
+- [x] Supports `--dry-run` and `--days N` flags
+- [x] GitHub Actions cron: `.github/workflows/retention-cleanup.yml` — runs daily at 02:00 UTC
+- [x] Manual trigger available from GitHub Actions UI with dry-run option
 
 ```sql
 DELETE FROM translations WHERE article_id IN (
@@ -92,5 +91,5 @@ Non-thinking mode is the cheapest paid option if the free tier is exceeded.
 | 1 | Fix hardcoded Odia prompt | High | Small | Done |
 | 2 | Add 6 missing languages to enum | High | Small | Done |
 | 3 | Batch 11 languages in 1 API call | Medium | Medium | Done |
-| 4 | 7-day database retention cleanup | Medium | Small | Open |
+| 4 | 7-day database retention cleanup | Medium | Small | Done |
 | 5 | Verify Gemini free tier / non-thinking mode | Low | Tiny | Open |
