@@ -48,7 +48,10 @@ ALL_TARGET_LANGUAGES: list[Language] = [
 
 def _get_gemini_client() -> genai.Client:
     settings = get_settings()
-    return genai.Client(api_key=settings.gemini_api_key)
+    return genai.Client(
+        api_key=settings.gemini_api_key,
+        http_options=types.HttpOptions(timeout=180),
+    )
 
 
 def get_translation_prompt(brief: Brief, target_language: Language) -> str:
@@ -166,7 +169,7 @@ def call_gemini_translation(model_name: str, prompt: str) -> str:
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.3,
-                max_output_tokens=8192,
+                max_output_tokens=65536,
             ),
         )
 
@@ -406,6 +409,7 @@ def translate_briefs_batch(
                 brief_id=brief.id,
                 error=str(e),
             )
+            print(f"   [ERROR] Translation failed for brief {brief.id}: {e}")
 
     logger.info(
         "translation.briefs_batch_completed",
