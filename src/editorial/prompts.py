@@ -1,40 +1,105 @@
 """Prompts for meaningful summarization and transformation."""
 
-# German sources that need meaningful transformation to English
-GERMAN_SOURCES = {"Tagesschau", "Süddeutsche Zeitung"}
+# Maps source name → content language code.
+# Sources not listed here are assumed to publish in English.
+SOURCE_LANGUAGE: dict[str, str] = {
+    # Germany
+    "Tagesschau": "de",
+    "Süddeutsche Zeitung": "de",
+    # Japan
+    "NHK News": "ja",
+    # Turkey
+    "Hürriyet": "tr",
+    "NTV Haber": "tr",
+    # Korea
+    "KBS News": "ko",
+    # Poland
+    "TVN24": "pl",
+    # Bangladesh
+    "Prothom Alo": "bn",
+    # Brazil
+    "G1 Globo": "pt",
+    # Mexico
+    "El Universal": "es",
+    # Qatar
+    "Al Jazeera Arabic": "ar",
+    # Vietnam
+    "VnExpress": "vi",
+    # China
+    "Xinhua": "zh",
+    "People's Daily": "zh",
+}
+
+# Language code → (display name, key terms, country context)
+_LANG_META: dict[str, tuple[str, str, str]] = {
+    "de": (
+        "German",
+        "Bundeskanzler = Chancellor (Germany's head of government), Bundestag = Federal Parliament",
+        "Germany = Europe's largest economy, founding EU member, key NATO ally",
+    ),
+    "ja": (
+        "Japanese",
+        "首相 (Shushō) = Prime Minister, 国会 (Kokkai) = National Diet (parliament)",
+        "Japan = world's 4th largest economy, key US ally in Asia, pacifist constitution",
+    ),
+    "tr": (
+        "Turkish",
+        "Cumhurbaşkanı = President, Büyük Millet Meclisi = Grand National Assembly",
+        "Turkey = NATO member bridging Europe and Asia, major regional power, G20 economy",
+    ),
+    "ko": (
+        "Korean",
+        "대통령 (Daetongnyeong) = President, 국회 (Gukhoe) = National Assembly",
+        "South Korea = world's 13th largest economy, divided peninsula, major tech exporter (Samsung, Hyundai)",
+    ),
+    "pl": (
+        "Polish",
+        "Prezydent = President, Sejm = lower house of parliament, Senat = upper house",
+        "Poland = EU and NATO member, largest economy in Central Europe, key eastern flank ally",
+    ),
+    "bn": (
+        "Bengali",
+        "রাষ্ট্রপতি (Rashtropati) = President, প্রধানমন্ত্রী (Pradhanmantri) = Prime Minister",
+        "Bangladesh = 8th most populous country, world's largest garment exporter, fast-growing economy",
+    ),
+    "pt": (
+        "Brazilian Portuguese",
+        "Presidente = President, Câmara dos Deputados = Chamber of Deputies (lower house)",
+        "Brazil = world's 9th largest economy, Amazon rainforest steward, BRICS member",
+    ),
+    "es": (
+        "Spanish",
+        "Presidente = President, Congreso = Congress, Senado = Senate",
+        "Mexico = 2nd largest economy in Latin America, shares world's busiest border with the US, USMCA member",
+    ),
+    "ar": (
+        "Arabic",
+        "رئيس الوزراء = Prime Minister, أمير = Emir, مجلس الشورى = Shura Council",
+        "Qatar = world's largest LNG exporter, hosts US military base, 2022 FIFA World Cup host; note: Arabic is read right-to-left",
+    ),
+    "vi": (
+        "Vietnamese",
+        "Tổng Bí thư = General Secretary (most powerful role), Thủ tướng = Prime Minister",
+        "Vietnam = one-party communist state, one of Southeast Asia's fastest-growing economies, major manufacturing hub",
+    ),
+    "zh": (
+        "Chinese (Simplified)",
+        "总书记 (Zǒng Shūjì) = General Secretary (most powerful role), 总理 (Zǒnglǐ) = Premier",
+        "China = world's 2nd largest economy, permanent UN Security Council member, central to US-China geopolitical rivalry",
+    ),
+}
 
 
-def get_summarization_prompt(article_title: str, article_content: str, source_name: str) -> str:
-    """Get appropriate summarization prompt based on source language.
+def _native_to_english_prompt(title: str, content: str, lang_code: str) -> str:
+    """Build a native-language → English transformation prompt."""
+    lang_name, terms, context = _LANG_META[lang_code]
+    return f"""You are a news editor transforming {lang_name} news for international readers.
 
-    Args:
-        article_title: Article title
-        article_content: Article content
-        source_name: Source name (to detect language)
-
-    Returns:
-        Formatted prompt for LLM
-    """
-    is_german = source_name in GERMAN_SOURCES
-
-    if is_german:
-        return get_german_transformation_prompt(article_title, article_content)
-    else:
-        return get_english_summarization_prompt(article_title, article_content)
-
-
-def get_german_transformation_prompt(title: str, content: str) -> str:
-    """Prompt for German → English meaningful transformation.
-
-    Not literal translation - explain meaningfully for international readers.
-    """
-    return f"""You are a news editor transforming German news for international readers.
-
-Read this German article and create 3 English summaries that are clear and understandable for people who don't follow German politics or culture.
+Read this {lang_name} article and create 3 English summaries that are clear and understandable for people who don't follow this country's politics or culture.
 
 Don't just translate - EXPLAIN. Add context. Answer "Why should I care?"
 
-GERMAN ARTICLE:
+{lang_name.upper()} ARTICLE:
 Title: {title}
 Content: {content}
 
@@ -48,19 +113,19 @@ Create exactly 3 summaries in English:
 2. BRIEF (exactly 111 words):
 - What happened and why it matters
 - Who's involved (explain roles/positions)
-- Add context for non-German readers
+- Add context for international readers
 - Why this is globally significant
 
 3. DEEP DIVE (exactly 250 words):
 - Full story with background
 - What happened, why it matters, what's next
-- Explain German political/cultural context
+- Explain political/cultural context
 - Global implications
 - Key stakeholders and their positions
 
 IMPORTANT:
-- Explain German terms (Bundeskanzler = Chancellor, Germany's leader)
-- Add context (Germany = Europe's largest economy)
+- Explain local terms ({terms})
+- Add context ({context})
 - Make it meaningful, not literal translation
 - Write naturally in English
 - Stick to exact word counts
@@ -76,11 +141,61 @@ Format:
 }}"""
 
 
-def get_english_summarization_prompt(title: str, content: str) -> str:
-    """Prompt for English → English summarization.
+def get_summarization_prompt(article_title: str, article_content: str, source_name: str) -> str:
+    """Get appropriate summarization prompt based on source language."""
+    lang = SOURCE_LANGUAGE.get(source_name, "en")
+    if lang == "en":
+        return get_english_summarization_prompt(article_title, article_content)
+    return _native_to_english_prompt(article_title, article_content, lang)
 
-    Standard summarization with word count constraints.
-    """
+
+# Keep named wrappers for backwards compatibility and direct use in tests
+def get_german_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "de")
+
+
+def get_japanese_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "ja")
+
+
+def get_turkish_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "tr")
+
+
+def get_korean_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "ko")
+
+
+def get_polish_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "pl")
+
+
+def get_bengali_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "bn")
+
+
+def get_portuguese_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "pt")
+
+
+def get_spanish_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "es")
+
+
+def get_arabic_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "ar")
+
+
+def get_vietnamese_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "vi")
+
+
+def get_chinese_transformation_prompt(title: str, content: str) -> str:
+    return _native_to_english_prompt(title, content, "zh")
+
+
+def get_english_summarization_prompt(title: str, content: str) -> str:
+    """Prompt for English → English summarization."""
     return f"""You are a news editor creating a daily knowledge brief.
 
 Summarize this article in 3 different lengths. Focus on clarity and completeness.

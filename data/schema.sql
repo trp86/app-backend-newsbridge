@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS articles (
     source_url TEXT NOT NULL,
     source_name TEXT NOT NULL,
     source_type TEXT NOT NULL CHECK(source_type IN ('rss', 'api')),
+    country TEXT NOT NULL DEFAULT '',
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     published_at TIMESTAMP NOT NULL,
@@ -21,6 +22,8 @@ CREATE TABLE IF NOT EXISTS articles (
 CREATE TABLE IF NOT EXISTS briefs (
     id TEXT PRIMARY KEY,
     article_id TEXT NOT NULL,
+    country TEXT NOT NULL DEFAULT '',
+    source_priority INTEGER NOT NULL DEFAULT 1,
     title TEXT NOT NULL,
     summary_30 TEXT NOT NULL,
     summary_111 TEXT NOT NULL,
@@ -90,8 +93,10 @@ CREATE TABLE IF NOT EXISTS api_logs (
 CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_articles_hash ON articles(content_hash);
 CREATE INDEX IF NOT EXISTS idx_articles_duplicate ON articles(is_duplicate);
+CREATE INDEX IF NOT EXISTS idx_articles_country ON articles(country);
 CREATE INDEX IF NOT EXISTS idx_briefs_article ON briefs(article_id);
 CREATE INDEX IF NOT EXISTS idx_briefs_quality ON briefs(quality_score DESC);
+CREATE INDEX IF NOT EXISTS idx_briefs_country ON briefs(country);
 CREATE INDEX IF NOT EXISTS idx_translations_brief ON translations(brief_id);
 CREATE INDEX IF NOT EXISTS idx_translations_language ON translations(language);
 CREATE INDEX IF NOT EXISTS idx_publications_date ON publications(date DESC);

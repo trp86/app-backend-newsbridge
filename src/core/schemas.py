@@ -46,6 +46,7 @@ class RawArticle(BaseModel):
     source_url: HttpUrl
     source_name: str
     source_type: SourceType
+    country: str = ""
     title: str
     content: str
     published_at: datetime
@@ -76,6 +77,8 @@ class Brief(BaseModel):
 
     id: str
     article_id: str
+    country: str = ""
+    source_priority: int = 1
     title: str
     summary_30: str = Field(max_length=300, description="~30 words")
     summary_111: str = Field(max_length=1000, description="~111 words")
@@ -198,6 +201,7 @@ class RSSSource(BaseModel):
 
     name: str
     url: HttpUrl
+    country: str = Field(description="ISO 3166-1 alpha-2 country code (e.g. JP, DE)")
     priority: int = Field(ge=1, le=3, description="1=primary, 2=secondary, 3=fallback")
     expected_articles: int = Field(ge=1, description="Expected articles per day")
     enabled: bool = True

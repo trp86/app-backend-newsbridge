@@ -48,6 +48,7 @@ class ArticleResponse(BaseModel):
 
     id: str
     source: str
+    country: str
     category: str
     publishedAt: str
     english: dict[str, str]
@@ -89,19 +90,24 @@ async def health():
 async def get_articles(
     limit: int = Query(default=20, ge=1, le=100),
     language: Optional[str] = Query(default=None, description="Language code (e.g., 'or' for Odia)"),
+    country: Optional[str] = Query(default=None, description="ISO 3166-1 alpha-2 country code (e.g. JP, DE)"),
 ):
     """Get recent articles with briefs and translations.
 
     Args:
         limit: Maximum number of articles to return (1-100)
         language: Optional language code for translations
+        country: Optional country filter (e.g. JP, DE, KR)
 
     Returns:
         ArticlesResponse with articles and metadata
     """
     try:
-        # Fetch briefs from database
-        briefs = BriefRepository.get_recent_briefs(limit=limit)
+        # Fetch briefs from database (optionally filtered by country)
+        if country:
+            briefs = BriefRepository.get_briefs_by_country(country=country, limit=limit)
+        else:
+            briefs = BriefRepository.get_recent_briefs(limit=limit)
         logger.info("briefs_check", count=len(briefs))
 
         # Fallback to raw articles if no briefs available
@@ -132,6 +138,7 @@ async def get_articles(
                     ArticleResponse(
                         id=article.id,
                         source=article.source_name,
+                        country=article.country,
                         category="world",  # Default category for raw articles
                         publishedAt=article.published_at.isoformat() + "Z",
                         english={
@@ -176,7 +183,8 @@ async def get_articles(
 
             article = ArticleResponse(
                 id=brief.id,
-                source="Global News",  # You can enhance this by joining with articles table
+                source="Global News",
+                country=brief.country,
                 category=brief.category,
                 publishedAt=brief.processed_at.isoformat() + "Z",
                 english={
@@ -238,6 +246,7 @@ async def get_article(
         article = ArticleResponse(
             id=brief.id,
             source="Global News",
+            country=brief.country,
             category=brief.category,
             publishedAt=brief.processed_at.isoformat() + "Z",
             english={

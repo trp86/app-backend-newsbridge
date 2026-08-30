@@ -104,7 +104,7 @@ def collect_articles() -> list[RawArticle]:
 
             for entry in feed.entries:
                 try:
-                    article = parse_feed_entry(entry, source.name)
+                    article = parse_feed_entry(entry, source.name, source.country)
                     all_articles.append(article)
                 except Exception as e:
                     logger.error(
