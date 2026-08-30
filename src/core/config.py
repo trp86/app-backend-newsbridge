@@ -22,11 +22,11 @@ class Settings(BaseSettings):
     # Google Gemini API
     gemini_api_key: str = Field(description="Google Gemini API key")
     gemini_summarization_model: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-3.6-flash",
         description="Model for summarization",
     )
     gemini_translation_model: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-3.6-flash",
         description="Model for translation",
     )
 

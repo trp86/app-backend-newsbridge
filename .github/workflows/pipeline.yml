@@ -60,3 +60,8 @@ jobs:
             DRY_RUN_FLAG="--dry-run"
           fi
           python scripts/run_pipeline.py --max-articles ${MAX_ARTICLES} $DRY_RUN_FLAG
+
+      - name: Verify data
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/verify_data.py
