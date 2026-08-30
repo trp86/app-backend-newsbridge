@@ -63,12 +63,13 @@ def extract_content(entry: feedparser.FeedParserDict) -> str:
     return ""
 
 
-def parse_feed_entry(entry: feedparser.FeedParserDict, source_name: str) -> RawArticle:
+def parse_feed_entry(entry: feedparser.FeedParserDict, source_name: str, country: str = "") -> RawArticle:
     """Parse RSS feed entry into RawArticle.
 
     Args:
         entry: Feed entry from feedparser
         source_name: Name of the RSS source
+        country: ISO 3166-1 alpha-2 country code (e.g. JP, DE)
 
     Returns:
         Parsed RawArticle
@@ -98,6 +99,7 @@ def parse_feed_entry(entry: feedparser.FeedParserDict, source_name: str) -> RawA
         source_url=HttpUrl(source_url),
         source_name=source_name,
         source_type=SourceType.RSS,
+        country=country,
         title=title,
         content=content,
         published_at=published_at,

@@ -126,10 +126,29 @@ def init_database() -> None:
         else:
             # SQLite: use executescript for multiple statements
             cursor.executescript(schema_sql)
+        _run_migrations(cursor)
         logger.info(
             "database.initialized",
             database_type="postgres" if _use_postgres() else "sqlite",
         )
+
+
+def _run_migrations(cursor: Any) -> None:
+    """Add new columns to existing tables (idempotent)."""
+    if _use_postgres():
+        cursor.execute("ALTER TABLE articles ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT ''")
+        cursor.execute("ALTER TABLE briefs ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT ''")
+        cursor.execute("ALTER TABLE briefs ADD COLUMN IF NOT EXISTS source_priority INTEGER NOT NULL DEFAULT 1")
+    else:
+        for stmt in [
+            "ALTER TABLE articles ADD COLUMN country TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE briefs ADD COLUMN country TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE briefs ADD COLUMN source_priority INTEGER NOT NULL DEFAULT 1",
+        ]:
+            try:
+                cursor.execute(stmt)
+            except Exception:
+                pass  # Column already exists
 
 
 def _convert_schema_to_postgres(schema_sql: str) -> str:

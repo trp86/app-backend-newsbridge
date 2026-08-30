@@ -1,0 +1,62 @@
+name: Daily News Pipeline
+
+on:
+  schedule:
+    # 7:00 AM CEST (UTC+2) = 5:00 AM UTC
+    # Note: in winter (CET = UTC+1) this fires at 6:00 AM local time
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      max_articles:
+        description: "Max articles to process (default 300)"
+        required: false
+        default: "300"
+      dry_run:
+        description: "Dry run — ingest only, no Gemini calls"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      retention_days:
+        description: "Retention period in days (default 7)"
+        required: false
+        default: "7"
+
+jobs:
+  pipeline:
+    name: Cleanup → Ingest → Summarise → Translate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Delete articles older than N days
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python scripts/retention_cleanup.py --days ${{ github.event.inputs.retention_days || '7' }}
+
+      - name: Run pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+          MAX_ARTICLES: ${{ github.event.inputs.max_articles || '300' }}
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python scripts/run_pipeline.py --max-articles ${MAX_ARTICLES} $DRY_RUN_FLAG

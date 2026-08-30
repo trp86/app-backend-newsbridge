@@ -73,14 +73,14 @@ DELETE FROM articles WHERE published_at < NOW() - INTERVAL '7 days';
 ---
 
 ## 5. Verify Gemini Free Tier / Non-Thinking Mode
-**Priority: Low | Effort: Tiny | Status: Open**
+**Priority: Low | Effort: Tiny | Status: ✅ Done**
 
 At 100 articles/day the free tier (1,500 req/day) should cover costs entirely.
 Non-thinking mode is the cheapest paid option if the free tier is exceeded.
 
-- [ ] Confirm `GEMINI_TRANSLATION_MODEL` is set to `gemini-2.5-flash`
-- [ ] Confirm thinking mode is not enabled in `GenerationConfig`
-- [ ] Verify API key is from Google AI Studio (free tier) not Vertex AI (paid only)
+- [x] `gemini_translation_model` default fixed to `gemini-2.5-flash` in `src/core/config.py`
+- [x] Thinking mode not enabled — `GenerateContentConfig(temperature=0.3)` only, no thinking param
+- [ ] Verify API key is from Google AI Studio (free tier) not Vertex AI (paid only) — manual check
 
 ---
 
@@ -92,4 +92,4 @@ Non-thinking mode is the cheapest paid option if the free tier is exceeded.
 | 2 | Add 6 missing languages to enum | High | Small | Done |
 | 3 | Batch 11 languages in 1 API call | Medium | Medium | Done |
 | 4 | 7-day database retention cleanup | Medium | Small | Done |
-| 5 | Verify Gemini free tier / non-thinking mode | Low | Tiny | Open |
+| 5 | Verify Gemini free tier / non-thinking mode | Low | Tiny | Done |

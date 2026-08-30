@@ -29,14 +29,16 @@ class BriefRepository:
             cursor.execute(
                 f"""
                 INSERT INTO briefs (
-                    id, article_id, title,
+                    id, article_id, country, source_priority, title,
                     summary_30, summary_111, summary_250,
                     category, quality_score, model_used, processed_at
-                ) VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})
+                ) VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})
                 """,
                 (
                     brief.id,
                     brief.article_id,
+                    brief.country,
+                    brief.source_priority,
                     brief.title,
                     brief.summary_30,
                     brief.summary_111,
@@ -97,7 +99,7 @@ class BriefRepository:
             ph = get_placeholder()
             cursor.execute(
                 f"""
-                SELECT id, article_id, title,
+                SELECT id, article_id, country, source_priority, title,
                        summary_30, summary_111, summary_250,
                        category, quality_score, model_used, processed_at
                 FROM briefs
@@ -120,6 +122,8 @@ class BriefRepository:
         return Brief(
             id=row["id"],
             article_id=row["article_id"],
+            country=row["country"],
+            source_priority=row["source_priority"],
             title=row["title"],
             summary_30=row["summary_30"],
             summary_111=row["summary_111"],
@@ -145,7 +149,7 @@ class BriefRepository:
             ph = get_placeholder()
             cursor.execute(
                 f"""
-                SELECT id, article_id, title,
+                SELECT id, article_id, country, source_priority, title,
                        summary_30, summary_111, summary_250,
                        category, quality_score, model_used, processed_at
                 FROM briefs
@@ -172,6 +176,7 @@ class BriefRepository:
                 Brief(
                     id=row["id"],
                     article_id=row["article_id"],
+                    country=row["country"],
                     title=row["title"],
                     summary_30=row["summary_30"],
                     summary_111=row["summary_111"],
@@ -185,6 +190,62 @@ class BriefRepository:
 
         logger.debug("repository.recent_briefs_fetched", count=len(briefs))
 
+        return briefs
+
+    @staticmethod
+    def get_briefs_by_country(country: str, limit: int = 50) -> list[Brief]:
+        """Get briefs filtered by country code.
+
+        Args:
+            country: ISO 3166-1 alpha-2 country code (e.g. JP, DE)
+            limit: Maximum number of briefs to return
+
+        Returns:
+            List of briefs for the given country, ordered by processed_at DESC
+        """
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            ph = get_placeholder()
+            cursor.execute(
+                f"""
+                SELECT id, article_id, country, source_priority, title,
+                       summary_30, summary_111, summary_250,
+                       category, quality_score, model_used, processed_at
+                FROM briefs
+                WHERE country = {ph} AND source_priority = 1
+                ORDER BY processed_at DESC
+                LIMIT {ph}
+                """,
+                (country.upper(), limit),
+            )
+            rows = cursor.fetchall()
+
+        briefs = []
+        for row in rows:
+            if row["processed_at"] is None:
+                continue
+            processed_at = (
+                row["processed_at"]
+                if isinstance(row["processed_at"], datetime)
+                else datetime.fromisoformat(row["processed_at"])
+            )
+            briefs.append(
+                Brief(
+                    id=row["id"],
+                    article_id=row["article_id"],
+                    country=row["country"],
+                    title=row["title"],
+                    summary_30=row["summary_30"],
+                    summary_111=row["summary_111"],
+                    summary_250=row["summary_250"],
+                    category=row["category"],
+                    quality_score=row["quality_score"],
+                    model_used=row["model_used"],
+                    processed_at=processed_at,
+                )
+            )
+
+        logger.debug("repository.briefs_by_country", country=country, count=len(briefs))
         return briefs
 
     @staticmethod

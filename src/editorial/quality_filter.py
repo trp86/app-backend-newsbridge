@@ -11,11 +11,55 @@ logger = structlog.get_logger()
 
 # Trusted news sources (higher credibility)
 TRUSTED_SOURCES = {
+    # Germany
     "Tagesschau",
     "Süddeutsche Zeitung",
     "Der Spiegel International",
     "Deutsche Welle World",
     "Handelsblatt Global",
+    # Japan
+    "NHK News",
+    "NHK World",
+    "Japan Times",
+    "Nikkei Asia",
+    # Korea
+    "KBS News",
+    "Yonhap News",
+    "Korea Herald",
+    # Poland
+    "TVN24",
+    "Notes from Poland",
+    "Polish Radio EN",
+    # Bangladesh
+    "Prothom Alo",
+    "The Daily Star BD",
+    "Dhaka Tribune",
+    # Brazil
+    "G1 Globo",
+    "Agência Brasil EN",
+    "The Rio Times",
+    # Mexico
+    "El Universal",
+    "Mexico News Daily",
+    # Qatar
+    "Al Jazeera Arabic",
+    "Al Jazeera English",
+    "Gulf Times",
+    # Turkey
+    "Hürriyet",
+    "NTV Haber",
+    "Daily Sabah",
+    "TRT World",
+    # Vietnam
+    "VnExpress",
+    "VnExpress International",
+    "Tuoi Tre News",
+    # China
+    "Xinhua",
+    "People's Daily",
+    "China Daily",
+    "Global Times",
+    # International
     "Reuters",
     "BBC",
     "AP",

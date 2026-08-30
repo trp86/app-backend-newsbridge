@@ -29,16 +29,17 @@ class ArticleRepository:
             cursor.execute(
                 f"""
                 INSERT INTO articles (
-                    id, source_url, source_name, source_type,
+                    id, source_url, source_name, source_type, country,
                     title, content, published_at, fetched_at,
                     content_hash, is_duplicate
-                ) VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})
+                ) VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})
                 """,
                 (
                     article.id,
                     str(article.source_url),
                     article.source_name,
                     article.source_type.value,
+                    article.country,
                     article.title,
                     article.content,
                     article.published_at.isoformat(),
@@ -101,7 +102,7 @@ class ArticleRepository:
             ph = get_placeholder()
             cursor.execute(
                 f"""
-                SELECT id, source_url, source_name, source_type,
+                SELECT id, source_url, source_name, source_type, country,
                        title, content, published_at, fetched_at,
                        content_hash, is_duplicate
                 FROM articles
@@ -123,6 +124,7 @@ class ArticleRepository:
             source_url=row["source_url"],
             source_name=row["source_name"],
             source_type=row["source_type"],
+            country=row["country"],
             title=row["title"],
             content=row["content"],
             published_at=published_at,
@@ -146,7 +148,7 @@ class ArticleRepository:
             ph = get_placeholder()
             cursor.execute(
                 f"""
-                SELECT id, source_url, source_name, source_type,
+                SELECT id, source_url, source_name, source_type, country,
                        title, content, published_at, fetched_at,
                        content_hash, is_duplicate
                 FROM articles
@@ -170,6 +172,7 @@ class ArticleRepository:
                     source_url=row["source_url"],
                     source_name=row["source_name"],
                     source_type=row["source_type"],
+                    country=row["country"],
                     title=row["title"],
                     content=row["content"],
                     published_at=published_at,

@@ -9,7 +9,7 @@ from google.genai import types
 import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from src.core.config import get_settings
+from src.core.config import get_settings, get_source_priority_map
 from src.core.schemas import Brief, RawArticle
 from src.editorial.prompts import get_summarization_prompt
 
@@ -164,9 +164,12 @@ def summarize_article(article: RawArticle) -> Brief:
     summaries = parse_summary_response(response)
 
     # Create Brief object
+    priority_map = get_source_priority_map()
     brief = Brief(
         id=f"brief_{article.id}",
         article_id=article.id,
+        country=article.country,
+        source_priority=priority_map.get(article.source_name, 2),
         title=summaries["summary_30"][:100],  # Use first part of headline as title
         summary_30=summaries["summary_30"],
         summary_111=summaries["summary_111"],
